@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>إنجيه · لوحة إدارة المَرْبَط | 3 شاشات Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap');
+        * { transition: all 0.2s ease; }
+        body { font-family: 'Cairo', 'Inter', system-ui; background: #f1f5f9; }
+        .screen-card { transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); cursor: pointer; }
+        .screen-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 25px 35px -12px rgba(0,0,0,0.25); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #0f172a; border-radius: 10px; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: translateY(0);} }
+        .animate-entry { animation: fadeSlide 0.4s ease-out; }
+        .dev-header { border-right: 8px solid #475569; background: linear-gradient(90deg, #f8fafc, #ffffff); }
+    </style>
+</head>
+<body class="antialiased">
+
+<!-- HEADER خاص بإنجيه -->
+<div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-2xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-5 py-5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-4">
+            <div class="bg-slate-700 p-3 rounded-2xl shadow-inner">
+                <i class="fa-solid fa-user-astronaut text-3xl text-slate-200"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight">إنجيه · مساحة العمل</h1>
+                <p class="text-sm opacity-90 flex items-center gap-2"><i class="fa-solid fa-diagram-project text-xs"></i> 3 شاشات إدارية مُفصَّلة (Admin Core) — جاهزة للتطوير والتسليم</p>
+            </div>
+        </div>
+        <div class="flex gap-3 items-center">
+            <div class="bg-white/20 backdrop-blur-sm rounded-full px-5 py-2 text-sm font-bold"><i class="fa-regular fa-rectangle-list"></i> 3 شاشات مخصصة</div>
+            <button id="downloadInejihPack" class="bg-slate-700 hover:bg-slate-600 px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2 border border-slate-500"><i class="fa-solid fa-download"></i> تحميل حزمة إنجيه (JSON + دليل)</button>
+        </div>
+    </div>
+</div>
+
+<!-- ملخص التوزيع: إنجيه فقط -->
+<div class="max-w-7xl mx-auto px-5 pt-8 pb-2">
+    <div class="bg-gradient-to-r from-slate-50 to-blue-50/50 rounded-2xl p-6 shadow-md border-r-8 border-slate-600 mb-8">
+        <div class="flex flex-wrap gap-5 items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-black text-slate-800 flex items-center gap-3"><i class="fa-solid fa-bolt"></i> شاشات إنجيه • Inejih Admin screens</h2>
+                <p class="text-gray-700 mt-2 max-w-3xl leading-relaxed">ثلاث شاشات محورية من لوحة تحكم المَرْبَط: <strong>نظرة عامة (Dashboard)</strong> مع تحليلات الأداء، <strong>إدارة السائقين</strong> مع تتبع حي، <strong>إدارة البائعين</strong> مع بيانات جغرافية. كل شاشة تحتوي على وصف معماري كامل، تدفق API، مكتبات مقترحة، وإجراءات تفاعلية.</p>
+            </div>
+            <div class="bg-slate-700 rounded-2xl p-5 text-center text-white shadow-lg">
+                <div class="text-4xl font-black">3</div>
+                <div class="text-sm font-medium tracking-wider">إنجيه</div>
+                <div class="text-[10px] opacity-80 mt-1">Dashboard · Drivers · Sellers</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- شبكة عرض شاشات إنجيه (3 شاشات فقط) -->
+<div id="inejihScreensContainer" class="max-w-7xl mx-auto px-5 pb-16"></div>
+
+<!-- مودال تفصيلي معماري (مُخصص لإنجيه) -->
+<div id="techModal" class="fixed inset-0 bg-black/90 z-[9999] hidden items-center justify-center p-4 backdrop-blur-sm" onclick="if(event.target===this) closeTechModal()">
+    <div class="bg-white rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-entry">
+        <div class="bg-gradient-to-r from-slate-100 to-white px-6 py-4 border-b flex justify-between items-center sticky top-0">
+            <div class="flex items-center gap-3 flex-wrap">
+                <span class="bg-slate-700 text-white text-xs font-bold px-4 py-1.5 rounded-full"><i class="fa-solid fa-chart-line"></i> شاشة إنجيه</span>
+                <h2 id="modalTitle" class="text-xl md:text-2xl font-bold text-slate-800"></h2>
+            </div>
+            <div class="flex gap-3 items-center">
+                <span id="modalAssignee" class="bg-slate-800 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-sm">إنجيه</span>
+                <button onclick="closeTechModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-red-100 text-red-600">✕</button>
+            </div>
+        </div>
+        <div class="flex flex-col md:flex-row overflow-auto flex-1">
+            <div class="md:w-1/2 bg-gray-900 flex items-center justify-center p-6">
+                <img id="modalImg" class="max-h-[60vh] md:max-h-[75vh] w-auto object-contain rounded-xl shadow-2xl border border-white/30" alt="screen preview">
+            </div>
+            <div class="md:w-1/2 p-6 space-y-5 overflow-y-auto">
+                <div>
+                    <h3 class="text-slate-800 font-bold text-sm uppercase tracking-wider"><i class="fa-regular fa-file-lines"></i> الوصف المعماري الشامل</h3>
+                    <p id="modalDesc" class="text-slate-700 mt-1 leading-relaxed text-base"></p>
+                </div>
+                <div>
+                    <h3 class="text-slate-800 font-bold text-sm uppercase tracking-wider"><i class="fa-solid fa-layer-group"></i> التقنيات الأساسية</h3>
+                    <div id="modalTechStack" class="flex flex-wrap gap-2 mt-2"></div>
+                </div>
+                <div>
+                    <h3 class="text-slate-800 font-bold text-sm uppercase tracking-wider"><i class="fa-solid fa-microchip"></i> المكتبات / الأدوات</h3>
+                    <div id="modalLibraries" class="flex flex-wrap gap-2 mt-2"></div>
+                </div>
+                <div class="bg-gradient-to-r from-slate-100 to-blue-50/80 p-5 rounded-2xl border border-slate-200">
+                    <h3 class="font-bold text-slate-800"><i class="fa-solid fa-diagram-project"></i> تدفق البيانات (API / Events)</h3>
+                    <p id="modalFlow" class="text-sm text-slate-800 mt-2 font-mono leading-relaxed"></p>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="downloadSingleScreen()" id="modalDownloadSingle" class="flex-1 bg-slate-700 hover:bg-slate-800 text-white py-3 rounded-xl font-bold transition-all"><i class="fa-solid fa-download"></i> تحميل الشاشة (PNG)</button>
+                    <button onclick="closeTechModal()" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white py-3 rounded-xl font-bold transition-all"><i class="fa-regular fa-circle-check"></i> إغلاق</button>
+                </div>
+                <p class="text-xs text-slate-500 text-center mt-1">إنجيه · شاشات Admin الجاهزة للتطوير</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // شاشات إنجيه – 3 شاشات محددة بتفاصيل كاملة
+    // Dashboard Overview / Drivers Management / Sellers Management
+    // ============================================================
+    
+    const inejihScreens = [
+        {
+            id: 'inejih-dash',
+            src: "admin_dashbaord web ui dashabord page.jpeg",
+            title: "نظرة عامة · Dashboard Overview",
+            assign: "Inejih",
+            desc: "لوحة التحكم الرئيسية للمشرف: تعرض أداء الإيرادات عبر رسم بياني خطي/شريطي تفاعلي، عمليات السوق النشطة (توصيل، تحقق، تحميل مراكز التجهيز)، أحدث الطلبات الواردة، قضايا الدعم المفتوحة، ونمو المنصة اليومي (42 تسجيل اليوم). تقدم رؤية شاملة لأداء المنصة مع إمكانية التنقل السريع.",
+            tech: ["Next.js 14", "Recharts", "Tailwind CSS", "WebSocket"],
+            libs: ["recharts", "date-fns", "react-hot-toast", "socket.io-client"],
+            flow: "GET /api/admin/stats → إحصائيات لحظية (إيرادات، مستخدمين). GET /api/admin/recent-orders → آخر 10 طلبات. WebSocket (wss://) لتحديثات حية للعمليات (التوصيل، التحقق)."
+        },
+        {
+            id: 'inejih-drivers',
+            src: "admin_dashbaord web ui delivery manegments page.jpeg",
+            title: "إدارة السائقين · Drivers Management",
+            assign: "Inejih",
+            desc: "منظومة متكاملة لإدارة الأسطول: إجمالي السائقين (124)، النشط حاليًا (42)، متوسط وقت التوصيل (48 دقيقة). تحتوي على خريطة تتبع حية لمواقع السائقين، قائمة مفصلة بالأداء مع الإجراءات (تعليق، تنبيه، عرض التفاصيل)، ورسم بياني لكفاءة الأسطول الأسبوعية. تدعم التحديث اللحظي للمواقع.",
+            tech: ["Next.js", "Leaflet/Mapbox GL", "WebSocket", "TanStack Table"],
+            libs: ["leaflet", "react-leaflet", "recharts", "@tanstack/react-table", "react-hook-form"],
+            flow: "GET /api/admin/drivers → جلب قائمة السائقين مع pagination. WebSocket (topic: driver-location) لتحديث مواقع السائقين لحظة بلحظة. POST /api/admin/drivers/{id}/status لتغيير الحالة (نشط/غير نشط)."
+        },
+        {
+            id: 'inejih-sellers',
+            src: "admin_dashbaord_web_ui_saller_managments_page.jpeg",
+            title: "إدارة البائعين · Sellers Management",
+            assign: "Inejih",
+            desc: "شاشة تحكم متقدمة في البائعين: إجمالي البائعين 1,284 (+12%)، قيد التحقق 42، قوائم نشطة 8,920، إجمالي مبيعات شهرية 4.2M SAR. يتضمن جدول تفاصيل البائعين (الموقع، حالة التحقق، المخزون، الأداء) مع توزيع جغرافي على الخريطة، ونظام نقاط جودة التحقق. تدعم إجراءات التوثيق والتواصل.",
+            tech: ["Next.js", "Recharts", "React Table", "Mapbox"],
+            libs: ["recharts", "@tanstack/react-table", "react-hot-toast", "mapbox-gl", "react-select"],
+            flow: "GET /api/admin/sellers → قائمة البائعين مع إحصائيات. GET /api/admin/sellers/geographic → بيانات GeoJSON للخريطة. POST /api/admin/sellers/verify → توثيق البائع (يتطلب تحميل مستندات)."
+        }
+    ];
+
+    console.log(`✅ شاشات إنجيه المُحمَّلة: ${inejihScreens.length} (Dashboard, Drivers, Sellers)`);
+
+    let currentModalScreen = null;
+
+    // عرض الشاشات الثلاث لإنجيه
+    function renderInejihScreens() {
+        const container = document.getElementById("inejihScreensContainer");
+        if (!container) return;
+
+        let html = `
+            <div class="mb-8">
+                <div class="dev-header pr-4 mb-6 p-5 rounded-2xl bg-white shadow-md flex justify-between items-center flex-wrap">
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800 flex items-center gap-3">
+                            <i class="fa-solid fa-user-astronaut text-slate-700"></i> 
+                            إنجيه · Inejih
+                            <span class="bg-slate-100 text-slate-700 text-base px-4 py-1 rounded-full">${inejihScreens.length} شاشات مُفصَّلة</span>
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1 flex items-center gap-2"><i class="fa-regular fa-circle-check text-emerald-600"></i> Dashboard · Drivers · Sellers — جاهزة للتطوير الكامل</p>
+                    </div>
+                    <div class="text-sm bg-slate-100 px-4 py-2 rounded-xl text-slate-700"><i class="fa-regular fa-file-code"></i> Next.js · Tailwind · Recharts</div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        `;
+        
+        inejihScreens.forEach(screen => {
+            html += `
+                <div class="screen-card bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all border border-slate-200" onclick='showInejihModal(${JSON.stringify(screen).replace(/'/g, "\\'")})'>
+                    <div class="relative bg-slate-100">
+                        <img src="${screen.src}" class="w-full aspect-[16/10] object-cover border-b-4 border-slate-300" alt="${screen.title}" 
+                             onerror="this.src='https://placehold.co/600x400/1e293b/ffffff?text=${encodeURIComponent(screen.title)}&font=montserrat'">
+                        <div class="absolute top-3 right-3 bg-slate-800 text-white text-[10px] px-3 py-1 rounded-full font-bold shadow">إنجيه</div>
+                        <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm text-white rounded-full px-3 py-1 text-xs font-bold shadow flex items-center gap-1"><i class="fa-regular fa-file-lines"></i> تفاصيل كاملة</div>
+                    </div>
+                    <div class="p-5">
+                        <p class="font-bold text-base leading-tight text-slate-800">${screen.title}</p>
+                        <p class="text-xs text-slate-500 mt-1 line-clamp-2">${screen.desc.substring(0, 80)}...</p>
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 mt-3 pt-2 border-t border-dashed">
+                            <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">${screen.tech[0]} · ${screen.tech[1]}</span>
+                            <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> عرض معماري</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+        container.innerHTML = html;
+    }
+
+    window.showInejihModal = function(screen) {
+        currentModalScreen = screen;
+        document.getElementById("modalTitle").innerText = screen.title;
+        document.getElementById("modalImg").src = screen.src || "https://placehold.co/600x350?text=Inejih+Screen";
+        document.getElementById("modalDesc").innerText = screen.desc;
+        document.getElementById("modalAssignee").innerHTML = `<i class="fa-regular fa-user-astronaut"></i> إنجيه · ${screen.assign}`;
+        
+        const techContainer = document.getElementById("modalTechStack");
+        techContainer.innerHTML = (screen.tech || ["Next.js", "Tailwind"]).map(t => 
+            `<span class="bg-slate-100 text-slate-800 px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200"><i class="fa-solid fa-code text-slate-600"></i> ${t}</span>`
+        ).join("");
+        
+        const libContainer = document.getElementById("modalLibraries");
+        libContainer.innerHTML = (screen.libs || ["axios", "react-query"]).map(l => 
+            `<span class="bg-blue-50 text-blue-800 px-3 py-1.5 rounded-full text-xs font-medium"><i class="fa-regular fa-gem"></i> ${l}</span>`
+        ).join("");
+        
+        document.getElementById("modalFlow").innerText = screen.flow;
+        
+        const modal = document.getElementById("techModal");
+        modal.classList.remove("hidden");
+        modal.style.display = "flex";
+    };
+
+    window.downloadSingleScreen = function() {
+        if(currentModalScreen) {
+            const link = document.createElement('a');
+            link.download = `Inejih_${currentModalScreen.title.replace(/\s+/g, '_')}.png`;
+            link.href = currentModalScreen.src;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            alert("لا توجد شاشة محددة");
+        }
+    };
+
+    window.closeTechModal = function() {
+        const modal = document.getElementById("techModal");
+        modal.style.display = "none";
+        modal.classList.add("hidden");
+        currentModalScreen = null;
+    };
+
+    // تحميل حزمة إنجيه (JSON + دليل نصي)
+    function downloadInejihPack() {
+        const dataStr = JSON.stringify(inejihScreens, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Inejih_Admin_Screens_3_Detailed.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        const textContent = inejihScreens.map((s, idx) => 
+            `${idx+1}. ${s.title}\n   المطور: إنجيه\n   وصف معماري: ${s.desc}\n   التقنيات: ${s.tech.join(" · ")}\n   المكتبات: ${s.libs.join(" · ")}\n   تدفق البيانات: ${s.flow}\n`
+        ).join("\n---\n");
+        const textBlob = new Blob([`حزمة إنجيه · 3 شاشات Admin معمارية كاملة\n\n${textContent}`], { type: "text/plain;charset=utf-8" });
+        const textUrl = URL.createObjectURL(textBlob);
+        const a2 = document.createElement("a");
+        a2.href = textUrl;
+        a2.download = `Inejih_admin_guide.txt`;
+        document.body.appendChild(a2);
+        a2.click();
+        document.body.removeChild(a2);
+        URL.revokeObjectURL(textUrl);
+        
+        alert(`✅ تم تحميل حزمة إنجيه: 3 شاشات Admin (JSON + دليل مفصل).`);
+    }
+
+    document.getElementById("downloadInejihPack")?.addEventListener("click", downloadInejihPack);
+    
+    // بدء العرض
+    renderInejihScreens();
+
+    // إغلاق المودال عند الضغط على Escape
+    document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeTechModal(); });
+</script>
+
+<!-- تذييل مخصص لإنجيه -->
+<div class="bg-slate-800 text-white py-6 mt-10 text-center text-sm border-t-4 border-slate-500">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-3">
+        <span><i class="fa-regular fa-hard-drive"></i> شاشات إنجيه: Dashboard · Drivers · Sellers — تغطية كاملة لتحليلات الأداء والعمليات</span>
+        <span><i class="fa-regular fa-clock"></i> Next.js 14 · Tailwind · Recharts · WebSocket · TanStack Table</span>
+        <span><i class="fa-regular fa-user-astronaut"></i> إنجيه · 3 شاشات جاهزة للتسليم</span>
+    </div>
+</div>
+</body>
+</html>
