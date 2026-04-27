@@ -104,7 +104,7 @@ const phasesMeta = [
     { key: "phase9", name: "🌾 PHASE 9: عملية نشر الحيوان", icon: "fa-tractor", color: "green" },
     { key: "phase10", name: "🔍 PHASE 10: إدارة البحث والفلاتر", icon: "fa-search", color: "green" },
     { key: "phase11", name: "📜 PHASE 11: سجل الطلبات و QR Code", icon: "fa-history", color: "green" },
-    { key: "phase12", name: "📜 PHASE 11: إدارة الشراء  ", icon: "fa-history", color: "green" },
+    { key: "phase12", name: "📊 PHASE 12: إدارة الشراء (Admin Purchase Management)", icon: "fa-chart-line", color: "purple" }
 ];
 
 const screensDB = [
@@ -115,7 +115,6 @@ const screensDB = [
     { id: 4, src: "commun screens between all users otp verification screen.jpeg", title: "التحقق من OTP", phase: "phase0", desc: "إدخال رمز التحقق المرسل إلى الهاتف", apis: [{ method: "POST", path: "/auth/verify-otp/", desc: "التحقق من OTP" }], models: ["OTPVerification"], flow: "Verify OTP → activate account" },
     { id: 5, src: "commun screens between all users reinitialise passowrd .jpeg", title: "إعادة تعيين كلمة المرور", phase: "phase0", desc: "استعادة الحساب عبر رقم الهاتف", apis: [{ method: "POST", path: "/auth/password-reset/", desc: "طلب إعادة التعيين" }], models: ["Utilisateur"], flow: "Send OTP → verify → set new password" },
     
-
     // PHASE 1: Notifications
     { id: 7, src: "achetuer screens notification screen.jpeg", title: "إشعارات المشتري", phase: "phase1", desc: "جميع الإشعارات الخاصة بالعميل", apis: [{ method: "GET", path: "/notifications/", desc: "قائمة الإشعارات" }], models: ["Notification"], flow: "Real-time + history" },
     { id: 8, src: "driver screens notification screen.jpeg", title: "إشعارات السائق", phase: "phase1", desc: "تنبيهات المهام والعاجل", apis: [{ method: "GET", path: "/notifications/driver/", desc: "إشعارات السائق" }], models: ["Notification", "Livraison"], flow: "Active task alerts" },
@@ -135,7 +134,8 @@ const screensDB = [
 
     // PHASE 11: Order History
     { id: 18, src: "achetuer screens orders commands history screen.jpeg", title: "سجل الطلبات", phase: "phase11", desc: "تاريخ الطلبات السابقة", apis: [{ method: "GET", path: "/orders/history/", desc: "سجل الطلبات" }], models: ["Commande"], flow: "Order history with status" },
-     { id: 39, src: "achetuer screens animal qr code screen for the delivery guy to scan screen.jpeg", title: "إدارة الشراء للبائع", phase: "phase11", desc: "عرض وإدارة طلبات الشراء", apis: [{ method: "GET", path: "/seller/purchases/", desc: "قائمة الشراء" }], models: ["Purchase"], flow: "Seller purchase management" },
+    { id: 39, src: "achetuer screens animal qr code screen for the delivery guy to scan screen.jpeg", title: "QR للتسليم (للعميل)", phase: "phase11", desc: "عرض رمز QR للتسليم", apis: [{ method: "GET", path: "/deliveries/{id}/qr/", desc: "QR للتسليم" }], models: ["Livraison"], flow: "QR code for delivery confirmation" },
+    
     // PHASE 6: Delivery & Tracking
     { id: 19, src: "achetuer screens live map tracking screen.jpeg", title: "تتبع التوصيل المباشر", phase: "phase6", desc: "خريطة حية للسائق", apis: [{ method: "GET", path: "/deliveries/track/{id}/", desc: "تتبع الطلب" }, { method: "WS", path: "/ws/delivery/{id}/", desc: "WebSocket tracking" }], models: ["Livraison"], flow: "Live location tracking" },
     { id: 20, src: "achetuer screens animal qr code screen for the delivery guy to scan screen.jpeg", title: "شاشة QR Code للتوصيل", phase: "phase6", desc: "رمز QR للسائق", apis: [{ method: "GET", path: "/deliveries/{id}/qr/", desc: "عرض QR" }], models: ["Livraison"], flow: "QR code for delivery confirmation" },
@@ -154,22 +154,72 @@ const screensDB = [
     { id: 29, src: "saller screens animal qr code screen for the delevery guy to scanit and pick up anil form saller.jpeg", title: "رمز QR لاستلام الحيوان من البائع", phase: "phase4", desc: "إظهار QR للسائق", apis: [{ method: "GET", path: "/animals/{id}/pickup-qr/", desc: "QR للاستلام" }], models: ["Animal"], flow: "Driver scans at seller location" },
 
     // PHASE 5: Butcher
-    { id: 29, src: "bucher screens bucher home screen.jpeg", title: "لوحة الجزار", phase: "phase5", desc: "الطلبات المعلقة", apis: [{ method: "GET", path: "/butcher/preparations/", desc: "طلبات التجهيز" }], models: ["Preparation"], flow: "Butcher dashboard" },
-    { id: 30, src: "bucher screens qr code screen.jpeg", title: "لوحة الجزار", phase: "phase5", desc: "الطلبات المعلقة", apis: [{ method: "GET", path: "/butcher/preparations/", desc: "طلبات التجهيز" }], models: ["Preparation"], flow: "Butcher dashboard" },
+    { id: 30, src: "bucher screens bucher home screen.jpeg", title: "لوحة الجزار", phase: "phase5", desc: "الطلبات المعلقة", apis: [{ method: "GET", path: "/butcher/preparations/", desc: "طلبات التجهيز" }], models: ["Preparation"], flow: "Butcher dashboard" },
+    { id: 31, src: "bucher screens qr code screen.jpeg", title: "رمز QR للجزار", phase: "phase5", desc: "تأكيد تجهيز الطلب", apis: [{ method: "GET", path: "/butcher/preparations/{id}/qr/", desc: "QR للتجهيز" }], models: ["Preparation"], flow: "Butcher QR" },
 
     // PHASE 6: Driver
-    { id: 31, src: "driver screens driver home screen also where he sees all assigned missions.jpeg", title: "مهام السائق", phase: "phase6", desc: "المهام المسندة", apis: [{ method: "GET", path: "/driver/missions/", desc: "قائمة المهام" }], models: ["Livraison"], flow: "Assigned deliveries" },
-    { id: 32, src: "driver screens qr code driver mission details screen.jpeg", title: "تفاصيل المهمة", phase: "phase6", desc: "معلومات البائع والمشتري", apis: [{ method: "GET", path: "/driver/missions/{id}/", desc: "تفاصيل المهمة" }], models: ["Livraison", "Commande"], flow: "Mission details" },
-    { id: 33, src: "driver screens qr code saning screen for the bucher saller and bueyr users screen.jpeg", title: "مسح رمز QR للتسليم", phase: "phase6", desc: "مسح QR عند البائع أو الجزار أو المشتري", apis: [{ method: "POST", path: "/driver/scan/", desc: "معالجة مسح QR" }], models: ["DeliveryScanEvent"], flow: "Scan → update delivery status" },
-    { id: 34, src: "driver screens driver live map.jpeg", title: "مسح رمز QR للتسليم", phase: "phase6", desc: "مسح QR عند البائع أو الجزار أو المشتري", apis: [{ method: "POST", path: "/driver/scan/", desc: "معالجة مسح QR" }], models: ["DeliveryScanEvent"], flow: "Scan → update delivery status" },
+    { id: 32, src: "driver screens driver home screen also where he sees all assigned missions.jpeg", title: "مهام السائق", phase: "phase6", desc: "المهام المسندة", apis: [{ method: "GET", path: "/driver/missions/", desc: "قائمة المهام" }], models: ["Livraison"], flow: "Assigned deliveries" },
+    { id: 33, src: "driver screens qr code driver mission details screen.jpeg", title: "تفاصيل المهمة", phase: "phase6", desc: "معلومات البائع والمشتري", apis: [{ method: "GET", path: "/driver/missions/{id}/", desc: "تفاصيل المهمة" }], models: ["Livraison", "Commande"], flow: "Mission details" },
+    { id: 34, src: "driver screens qr code saning screen for the bucher saller and bueyr users screen.jpeg", title: "مسح رمز QR للتسليم", phase: "phase6", desc: "مسح QR عند البائع أو الجزار أو المشتري", apis: [{ method: "POST", path: "/driver/scan/", desc: "معالجة مسح QR" }], models: ["DeliveryScanEvent"], flow: "Scan → update delivery status" },
+    { id: 35, src: "driver screens driver live map.jpeg", title: "الخريطة الحية للسائق", phase: "phase6", desc: "تحديد الموقع لتتبع الشحنة", apis: [{ method: "POST", path: "/driver/location/", desc: "تحديث الموقع" }], models: ["Livraison", "LocationHistory"], flow: "Live GPS tracking" },
 
     // PHASE 7: Profiles
-    { id: 35, src: "driver screens profile screen.jpeg", title: "ملف السائق", phase: "phase7", desc: "التقييم والإحصائيات", apis: [{ method: "GET", path: "/driver/profile/", desc: "بيانات السائق" }], models: ["ProfileLivreur"], flow: "Driver profile" },
-    { id: 36, src: "saller screens profile screen.jpeg", title: "ملف البائع", phase: "phase7", desc: "إحصائيات المبيعات والتقييمات", apis: [{ method: "GET", path: "/seller/profile/", desc: "بيانات البائع" }], models: ["ProfileVendeur"], flow: "Seller profile" },
-    { id: 37, src: "achetuer screens profile screen.jpeg", title: "ملف المشتري", phase: "phase7", desc: "سجل الطلبات والتقييمات", apis: [{ method: "GET", path: "/buyer/profile/", desc: "بيانات المشتري" }], models: ["ProfileAcheteur"], flow: "Buyer profile" },
-    { id: 38, src: "bucher screens profile screen.jpeg", title: "ملف الجزار", phase: "phase7", desc: "إحصائيات التجهيز والتقييمات", apis: [{ method: "GET", path: "/butcher/profile/", desc: "بيانات الجزار" }], models: ["ProfileBoucher"], flow: "Butcher profile" },
-    //phase 12: Purchase Management
+    { id: 36, src: "driver screens profile screen.jpeg", title: "ملف السائق", phase: "phase7", desc: "التقييم والإحصائيات", apis: [{ method: "GET", path: "/driver/profile/", desc: "بيانات السائق" }], models: ["ProfileLivreur"], flow: "Driver profile" },
+    { id: 37, src: "saller screens profile screen.jpeg", title: "ملف البائع", phase: "phase7", desc: "إحصائيات المبيعات والتقييمات", apis: [{ method: "GET", path: "/seller/profile/", desc: "بيانات البائع" }], models: ["ProfileVendeur"], flow: "Seller profile" },
+    { id: 38, src: "achetuer screens profile screen.jpeg", title: "ملف المشتري", phase: "phase7", desc: "سجل الطلبات والتقييمات", apis: [{ method: "GET", path: "/buyer/profile/", desc: "بيانات المشتري" }], models: ["ProfileAcheteur"], flow: "Buyer profile" },
+    { id: 40, src: "bucher screens profile screen.jpeg", title: "ملف الجزار", phase: "phase7", desc: "إحصائيات التجهيز والتقييمات", apis: [{ method: "GET", path: "/butcher/profile/", desc: "بيانات الجزار" }], models: ["ProfileBoucher"], flow: "Butcher profile" },
     
+    // ========== PHASE 12: إدارة الشراء (ADMIN PURCHASE MANAGEMENT) ==========
+    { id: 41, src: "Admin_pages web_dashboard dahsbaord page.png", title: "لوحة تحكم إدارة المشتريات (Admin)", phase: "phase12", desc: "لوحة تحكم متقدمة للمشرف تشمل عمليات الشراء، المدفوعات، الحالات، وتحليلات المبيعات", apis: [
+        { method: "GET", path: "/admin/purchases/", desc: "قائمة جميع عمليات الشراء مع فلاتر متقدمة" },
+        { method: "GET", path: "/admin/purchases/{id}/", desc: "تفاصيل عملية شراء محددة" },
+        { method: "PATCH", path: "/admin/purchases/{id}/status/", desc: "تحديث حالة الشراء (معلق / مؤكد / ملغي / مكتمل)" },
+        { method: "DELETE", path: "/admin/purchases/{id}/", desc: "حذف عملية شراء (استثنائي)" },
+        { method: "GET", path: "/admin/purchases/stats/", desc: "إحصائيات المشتريات (الإيرادات، عدد الطلبات، متوسط الأسعار)" },
+        { method: "GET", path: "/admin/payments/", desc: "جميع المدفوعات المرتبطة بالمشتريات" },
+        { method: "POST", path: "/admin/purchases/export/", desc: "تصدير بيانات المشتريات CSV/PDF" }
+    ], models: ["AdminPurchaseLog", "Commande", "Paiement", "Utilisateur", "Animal"], flow: "يقوم المشرف بمراقبة جميع صفقات الشراء، تحديث الحالات يدويًا عند الضرورة، عرض التقارير، وإدارة النزاعات أو الاستردادات." },
+    
+    { id: 42, src: "Admin_pages web_dashboard admin login page.png.jpeg", title: "تحليلات وإحصائيات المشتريات", phase: "phase12", desc: "لوحة تحليلية متكاملة للمبيعات اليومية، الشهرية، وأفضل البائعين والمنتجات", apis: [
+        { method: "GET", path: "/admin/analytics/sales/", desc: "تحليلات المبيعات اليومية/الشهرية/السنوية" },
+        { method: "GET", path: "/admin/analytics/top-sellers/", desc: "أفضل البائعين حسب المبيعات" },
+        { method: "GET", path: "/admin/analytics/top-animals/", desc: "الحيوانات الأكثر مبيعًا" },
+        { method: "GET", path: "/admin/analytics/revenue/", desc: "تقرير الإيرادات مع الضرائب والعمولات" }
+    ], models: ["AnalyticsReport", "Commande", "Paiement", "VendeurCommission"], flow: "يتم احتساب الإحصائيات تلقائيًا من قاعدة البيانات وعرضها برسوم بيانية تفاعلية للمشرف." },
+    
+    { id: 43, src: "Admin_pages web_dashboard admin otp verificaiton page.png.jpeg", title: "إدارة الاستردادات والنزاعات", phase: "phase12", desc: "مراقبة طلبات الاسترداد، النزاعات بين البائع والمشتري، واتخاذ القرارات الإدارية", apis: [
+        { method: "GET", path: "/admin/disputes/", desc: "قائمة جميع النزاعات المفتوحة" },
+        { method: "POST", path: "/admin/disputes/{id}/resolve/", desc: "حل النزاع لصالح طرف" },
+        { method: "POST", path: "/admin/refunds/approve/", desc: "الموافقة على طلب استرداد" },
+        { method: "POST", path: "/admin/refunds/reject/", desc: "رفض طلب استرداد" }
+    ], models: ["Dispute", "RefundRequest", "Commande"], flow: "يتيح للمشرف متابعة النزاعات، التواصل مع الأطراف، وإصدار أحكام استرداد الأموال إذا لزم الأمر." },
+    
+    { id: 44, src: "Admin_pages web_dashboard drivers manegments page.png", title: "إجراءات جماعية على المشتريات", phase: "phase12", desc: "تحديد عدة عمليات شراء وتطبيق إجراءات جماعية (تغيير حالة، إرسال إشعار، حذف مؤقت)", apis: [
+        { method: "POST", path: "/admin/purchases/bulk-status/", desc: "تحديث حالة مجموعة من الطلبات دفعة واحدة" },
+        { method: "POST", path: "/admin/purchases/bulk-notify/", desc: "إرسال إشعار جماعي للمشترين" },
+        { method: "POST", path: "/admin/purchases/bulk-export/", desc: "تصدير مجموعة محددة من المشتريات" }
+    ], models: ["Commande", "Notification"], flow: "المشرف يختار مجموعة من الطلبات > إجراء جماعي > تطبيق التغيير." },
+    
+    { id: 45, src: "Admin_pages web_dashboard listings manegments page.png", title: "سجل التدقيق والمراجعة", phase: "phase12", desc: "تتبع جميع التغييرات التي أجرها المشرفون على المشتريات وأذونات النظام", apis: [
+        { method: "GET", path: "/admin/audit-logs/", desc: "عرض سجل التعديلات" },
+        { method: "GET", path: "/admin/audit-logs/{id}/", desc: "تفاصيل تدقيق محددة" }
+    ], models: ["AuditLog", "AdminAction"], flow: "كل عملية تعديل على حالة الشراء أو النزاع تسجل تلقائيًا مع وقت التنفيذ واسم المشرف." },
+     { id: 46, src: "Admin_pages web_dashboard listings manegments page.png", title: "سجل التدقيق والمراجعة", phase: "phase12", desc: "تتبع جميع التغييرات التي أجرها المشرفون على المشتريات وأذونات النظام", apis: [
+        { method: "GET", path: "/admin/audit-logs/", desc: "عرض سجل التعديلات" },
+        { method: "GET", path: "/admin/audit-logs/{id}/", desc: "تفاصيل تدقيق محددة" }
+    ], models: ["AuditLog", "AdminAction"], flow: "كل عملية تعديل على حالة الشراء أو النزاع تسجل تلقائيًا مع وقت التنفيذ واسم المشرف." },
+     { id: 47, src: "Admin_pages web_dashboard listings manegments page.png", title: "سجل التدقيق والمراجعة", phase: "phase12", desc: "تتبع جميع التغييرات التي أجرها المشرفون على المشتريات وأذونات النظام", apis: [
+        { method: "GET", path: "/admin/audit-logs/", desc: "عرض سجل التعديلات" },
+        { method: "GET", path: "/admin/audit-logs/{id}/", desc: "تفاصيل تدقيق محددة" }
+    ], models: ["AuditLog", "AdminAction"], flow: "كل عملية تعديل على حالة الشراء أو النزاع تسجل تلقائيًا مع وقت التنفيذ واسم المشرف." },
+     { id: 48, src: "Admin_pages web_dashboard listings manegments page.png", title: "سجل التدقيق والمراجعة", phase: "phase12", desc: "تتبع جميع التغييرات التي أجرها المشرفون على المشتريات وأذونات النظام", apis: [
+        { method: "GET", path: "/admin/audit-logs/", desc: "عرض سجل التعديلات" },
+        { method: "GET", path: "/admin/audit-logs/{id}/", desc: "تفاصيل تدقيق محددة" }
+    ], models: ["AuditLog", "AdminAction"], flow: "كل عملية تعديل على حالة الشراء أو النزاع تسجل تلقائيًا مع وقت التنفيذ واسم المشرف." },
+     { id: 49, src: "Admin_pages web_dashboard listings manegments page.png", title: "سجل التدقيق والمراجعة", phase: "phase12", desc: "تتبع جميع التغييرات التي أجرها المشرفون على المشتريات وأذونات النظام", apis: [
+        { method: "GET", path: "/admin/audit-logs/", desc: "عرض سجل التعديلات" },
+        { method: "GET", path: "/admin/audit-logs/{id}/", desc: "تفاصيل تدقيق محددة" }
+    ], models: ["AuditLog", "AdminAction"], flow: "كل عملية تعديل على حالة الشراء أو النزاع تسجل تلقائيًا مع وقت التنفيذ واسم المشرف." }
 ];
 
 let currentPhaseFilter = "all";
@@ -227,9 +277,9 @@ function renderScreens() {
 
         group.forEach(screen => {
             html += `
-                <div class="screen-card bg-white rounded-3xl overflow-hidden shadow" onclick='showTechModal(${JSON.stringify(screen)}))'>
+                <div class="screen-card bg-white rounded-3xl overflow-hidden shadow" onclick='showTechModal(${JSON.stringify(screen).replace(/'/g, "&#39;")})'>
                     <img src="${screen.src}" class="w-full aspect-[9/19] object-cover" alt="${screen.title}" 
-                         onerror="this.src='https://placehold.co/300x570?text=${encodeURIComponent(screen.title)}'">
+                         onerror="this.src='https://placehold.co/300x570/2d3748/ffffff?text=${encodeURIComponent(screen.title)}'">
                     <div class="p-5">
                         <h3 class="font-bold text-lg leading-tight">${screen.title}</h3>
                         <p class="text-sm text-slate-600 mt-2 line-clamp-3">${screen.desc}</p>
@@ -256,7 +306,7 @@ window.showTechModal = function(screen) {
     if (screen.apis && screen.apis.length > 0) {
         apisHTML = screen.apis.map(api => `
             <div class="flex gap-3 items-start">
-                <span class="badge-${api.method.toLowerCase() || 'get'} text-white text-xs font-bold px-3 py-1 rounded">${api.method}</span>
+                <span class="badge-${api.method.toLowerCase()} text-white text-xs font-bold px-3 py-1 rounded">${api.method}</span>
                 <div>
                     <code class="text-emerald-600 font-medium">/api/v1${api.path}</code>
                     <p class="text-xs text-slate-500 mt-1">${api.desc}</p>
